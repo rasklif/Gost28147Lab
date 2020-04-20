@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <cstdlib>
 #include <iostream>
-#include<fstream>
+#include <fstream>
 using namespace std;
 uint8_t Gost_Table[_GOST_TABLE_SIZE] = {
 	0x04, 0x02, 0x0F, 0x05, 0x09, 0x01, 0x00, 0x08, 0x0E, 0x03, 0x0B, 0x0C, 0x0D, 0x07, 0x0A, 0x06,
@@ -64,6 +64,7 @@ uint8_t  Data_E[sizeof(Data_O)];
 uint8_t  Synchro[_GOST_Synchro_Size];
 int main(int argc, char *argv[])
 {
+	cout << "Data:" << endl;
 	for (int i = 0; i < 24; i++)
 		cout << hex<<(int)Data_O[i]<<"  ";
 	cout << endl;
@@ -75,12 +76,13 @@ int main(int argc, char *argv[])
 	//Simple replacement
 	memcpy(Data_E, Data_O, sizeof(Data_O));
 	GOST_Encrypt_SR(Data_E, sizeof(Data_E), _GOST_Mode_Encrypt, Gost_Table, GOST_Key_d);
+	cout << "Crypt Data:" << endl;
 	for (int i = 0; i < 24; i++)
 		cout << hex << (int)Data_E[i] << "  ";
 	cout << endl;
 
 	GOST_Encrypt_SR(Data_E, sizeof(Data_E), _GOST_Mode_Decrypt, Gost_Table, GOST_Key_d);
-
+	cout << "UnCrypt Data:" << endl;
 	for (int i = 0; i < 24; i++)
 		cout << hex << (int)Data_E[i] << "  ";
 	cout << endl;
@@ -89,26 +91,11 @@ int main(int argc, char *argv[])
 	memcpy(Synchro, Synchro_Et, sizeof(Synchro));
 	GOST_Crypt_G_PS(Synchro, Gost_Table, GOST_Key_d);//Decrypt Synchro acording to standart
 	GOST_Crypt_G_Data(Data_E, sizeof(Data_E), Synchro, Gost_Table, GOST_Key_d);
-	if (memcmp(Data_E, Data_C_G_Et, sizeof(Data_E)))
-	{
-		printf("Gamma encryption test failed\r\n");
-	}
-	else
-	{
-		printf("Gamma encryption test passed\r\n");
-	}
 
 	memcpy(Synchro, Synchro_Et, sizeof(Synchro));
 	GOST_Crypt_G_PS(Synchro, Gost_Table, GOST_Key_d);//Decrypt Synchro acording to standart
 	GOST_Crypt_G_Data(Data_E, sizeof(Data_E), Synchro, Gost_Table, GOST_Key_d);
-	if (memcmp(Data_O, Data_E, sizeof(Data_E)))
-	{
-		printf("Gamma decryption test failed\r\n");
-	}
-	else
-	{
-		printf("Gamma decryption test passed\r\n");
-	}
+
 	//Gamma with feedback
 	memcpy(Synchro, Synchro_Et, sizeof(Synchro));
 	memcpy(Data_E, Data_O, sizeof(Data_O));
@@ -116,27 +103,13 @@ int main(int argc, char *argv[])
 	GOST_Crypt_GF_Prepare_S(Synchro);
 #endif
 	GOST_Crypt_GF_Data(Data_E, sizeof(Data_E), Synchro, _GOST_Mode_Encrypt, Gost_Table, GOST_Key_d);
-	if (memcmp(Data_E, Data_C_GF_Et, sizeof(Data_E)))
-	{
-		printf("Gamma with feedback encryption test failed\r\n");
-	}
-	else
-	{
-		printf("Gamma with feedback encryption test passed\r\n");
-	}
+
 	memcpy(Synchro, Synchro_Et, sizeof(Synchro));
 #if _GOST_ROT_Synchro_GAMMA==1
 	GOST_Crypt_GF_Prepare_S(Synchro);
 #endif
 	GOST_Crypt_GF_Data(Data_E, sizeof(Data_E), Synchro, _GOST_Mode_Decrypt, Gost_Table, GOST_Key_d);
-	if (memcmp(Data_O, Data_E, sizeof(Data_E)))
-	{
-		printf("Gamma with feedback decryption test failed\r\n");
-	}
-	else
-	{
-		printf("Gamma with feedback decryption test passed\r\n");
-	}
+
 
 
 	system("pause");
